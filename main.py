@@ -20,10 +20,11 @@ match val:
         result = party.create_party(party_prisident, party_candidate)
         print(result)
     case 2:
-        from vote import voting
+        from vote import Voting
         party_id = int(input("Enter Party ID to vote for: "))
-        vote = voting()
-        result = vote.add_vote(party_id)
+        voter_id = int(input("Enter your Voter ID: "))
+        vote = Voting()
+        result = vote.add_vote(party_id, voter_id)
         print(result)
     case _:
         print("Invalid Input")

@@ -3,7 +3,7 @@ from sqlite3 import connect
 class Parties:
     def get_parties(self):
         result = []
-        with connect("voting_system.db") as conn:
+        with connect("./Database/voting.db") as conn:
             cursor = conn.cursor()
             cursor.execute("SELECT id, name FROM parties")
             parties = cursor.fetchall()
