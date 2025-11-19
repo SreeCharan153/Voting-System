@@ -1,8 +1,4 @@
 import bcrypt
-<<<<<<< HEAD
-=======
-import bcrypt
->>>>>>> 06c407796ad9b867b6be2b06e39e13f96a612dd0
 from sqlite3 import connect
 
 class Auth:
