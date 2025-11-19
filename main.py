@@ -9,6 +9,10 @@ val = int(input("Enter a number: "))
 match val:
     case 1:
         party_name = input("Enter Party Name: ")
+        party_prisident = input("Enter Party President: ")
+        party_candidate = input("Enter Party Candidate: ")
         party = addparty(party_name)
-        result = party.create_party()
+        result = party.create_party(party_prisident, party_candidate)
         print(result)
+    case _:
+        print("Invalid Input")
