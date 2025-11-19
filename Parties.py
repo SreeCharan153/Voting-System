@@ -1,12 +1,14 @@
+from sqlite3 import connect
+
 class Parties:
     def get_parties(self):
         result = []
-        with open("./partys/parties.txt", "r") as f:
-            lines = f.readlines()
-            for l in lines:
-                party = l.strip().split(":")
-                party_id = party[0]
-                party_name = party[1]
+        with connect("voting_system.db") as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT id, name FROM parties")
+            parties = cursor.fetchall()
+            for party in parties:
+                party_id, party_name = party
                 result.append(f"{party_id}:{party_name}")
         return "\n".join(result)
     
