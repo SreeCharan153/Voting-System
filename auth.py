@@ -1,5 +1,4 @@
 import bcrypt
-import bcrypt
 from sqlite3 import connect
 
 class Auth:
