@@ -1,9 +1,11 @@
 def get_parties():
-    parties = []
-    id = []
+    result = []
     with open("./partys/parties.txt", "r") as f:
-        id = f.readlines().strip().split(":")
-        id = [identity.strip() for identity in id]
-        parties = f.readlines().strip().split(":")
-        parties = [party.strip() for party in parties]
-    return f"{parties}, {id}"
+        lines = f.readlines()
+        for l in lines:
+            party = l.strip().split(":")
+            party_id = party[0]
+            party_name = party[1]
+            result.append(f"{party_id}:{party_name}")
+    return "\n".join(result)
+print(get_parties())
