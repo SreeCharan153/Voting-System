@@ -1,22 +1,19 @@
-from sqlite3 import connect
-class addparty:
-    def __init__(self, party_name):
-        self.party_name = party_name
-        with connect("./Database/voting.db") as conn:
-            self.cursor = conn.cursor()
-            self.cursor.execute('''CREATE TABLE IF NOT EXISTS parties
-                                (id INTEGER PRIMARY KEY AUTOINCREMENT,
-                                name TEXT NOT NULL,
-                                votes INTEGER DEFAULT 0,
-                                partypresident TEXT NOT NULL,
-                                partycandidate TEXT NOT NULL
+from db import get_conn
 
-                                )''')
-            conn.commit()
-    
-    def create_party(self,party_prisident, party_candidate):
-        with connect("./Database/voting.db") as conn:
-            self.cursor = conn.cursor()
-            self.cursor.execute("INSERT INTO parties (name, partypresident, partycandidate) VALUES (?, ?, ?)", (self.party_name, party_prisident,party_candidate))
-            conn.commit()
-        return f"Party '{self.party_name}' created successfully."
+
+class PartyManager:
+    def create_party(self, name: str, president: str, candidate: str) -> dict:
+        with get_conn() as conn:
+            cursor = conn.cursor()
+            try:
+                cursor.execute("SELECT id FROM parties WHERE name = ?", (name,))
+                if cursor.fetchone():
+                    return {"ok": False, "message": f"Party '{name}' already exists"}
+                cursor.execute(
+                "INSERT INTO parties (name, party_president, party_candidate) VALUES (?, ?, ?)",
+                (name, president, candidate)
+                )
+                conn.commit()
+                return {"ok": True, "message": f"Party '{name}' created", "party_id": cursor.lastrowid}
+            except Exception as e:
+                return {"ok": False, "message": str(e)}
