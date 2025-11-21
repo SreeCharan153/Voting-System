@@ -1,5 +1,5 @@
 from fastapi import FastAPI, HTTPException
-from models import Party, Vote, VoterRegister, AdminPasswordCheck, VoterPasswordCheck
+from models import Party, Vote, VoterRegister, AdminPasswordCheck, VoterPasswordCheck , ErrorResponse , UserResponse , WinnerResponse , HealthResponse , PartyListResponse
 from createParty import PartyManager
 from createvoter import VoterManager
 from Parties import Parties
@@ -7,65 +7,65 @@ from vote import Voting
 from auth import Auth
 from winner import winner as get_winner
 
+def handle_result(res):
+    if not res.get("ok"):
+        raise HTTPException(400, {"code": 400, "message": res.get("message")})
+    return UserResponse(ok=res["ok"], message=res["message"])
+
 app = FastAPI(title='Refactored Voting API')
-@app.get('/health')
+@app.get('/health', response_model=HealthResponse)
 def health():
-    return {'status': 'ok'}
+    return HealthResponse(status='ok')
 
 
-@app.post('/auth/set_admin_password')
+@app.post('/auth/set_admin_password', response_model=UserResponse, responses={400: {"model": ErrorResponse}})
 def set_admin_password(payload: AdminPasswordCheck):
     a = Auth()
     a.set_admin_password(payload.input_password)
-    return {'ok': True, 'message': 'Admin password set'}
+    return UserResponse(ok = True, message = 'Admin password set')
 
 
-@app.post('/auth/check_admin_password')
+@app.post('/auth/check_admin_password', response_model=UserResponse, responses={400: {"model": ErrorResponse}})
 def check_admin_password(payload: AdminPasswordCheck):
     a = Auth()
     valid = a.check_admin_password(payload.input_password)
-    return {'ok': valid}
+    return UserResponse(ok = True, message = 'Valid' if valid else 'Invalid')
 
 
-@app.post('/auth/check_user_password')
+@app.post('/auth/check_user_password', response_model=UserResponse, responses={400: {"model": ErrorResponse}})
 def check_user_password(payload: VoterPasswordCheck):
     a = Auth()
     valid = a.check_user_password(payload.voter_id, payload.input_password)
-    return {'ok': valid}
+    return UserResponse(ok = True, message = 'Valid' if valid else 'Invalid')
 
 
-@app.post('/create_party')
+@app.post('/create_party', response_model=UserResponse, responses={400: {"model": ErrorResponse}})
 def api_create_party(p: Party):
     pm = PartyManager()
     res = pm.create_party(p.party_name, p.party_president, p.party_candidate)
-    if not res.get('ok'):
-        raise HTTPException(status_code=400, detail=res.get('message'))
-    return res
+    return handle_result(res)
 
 
-@app.get('/parties')
+@app.get('/parties', response_model=PartyListResponse, responses={400: {"model": ErrorResponse}})
 def api_get_parties():
     p = Parties()
-    return p.get_parties()
+    data = p.get_parties()
+    return PartyListResponse(ok=data["ok"], parties=data["parties"])
 
 
-@app.post('/register_voter')
+@app.post('/register_voter', response_model=UserResponse, responses={400: {"model": ErrorResponse}})
 def api_register_voter(v: VoterRegister):
     vm = VoterManager()
     res = vm.create_voter(v.name, v.password)
-    if not res.get('ok'):
-        raise HTTPException(status_code=400, detail=res.get('message'))
-    return res
+    return handle_result(res)
 
-
-@app.post('/vote')
+@app.post('/vote', response_model=UserResponse, responses={400: {"model": ErrorResponse}})
 def api_vote(v: Vote):
     voting = Voting()
     res = voting.add_vote(v.party_id, v.voter_id)
-    if not res.get('ok'):
-        raise HTTPException(status_code=400, detail=res.get('message'))
-    return res
+    return handle_result(res)
 
-@app.get('/winner')
+@app.get('/winner', response_model=WinnerResponse, responses={400: {"model": ErrorResponse}})
 def api_winner():
-    return get_winner()
+    data = get_winner()
+    return WinnerResponse(**data)
